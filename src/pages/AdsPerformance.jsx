@@ -111,10 +111,14 @@ const AdsPerformance = () => {
                         const cpp = purchases > 0 ? spend / purchases : 0;
 
                         // Use Meta's reported revenue if available; otherwise estimate from purchases × client avg price
-                        const clientAvgPrice = parseFloat(
-                            activeClients.find(c => c.adAccountId === selectedAccountId)?.avgPrice || 0
-                        );
-                        const effectiveRevenue = purchaseValue > 0 ? purchaseValue : purchases * clientAvgPrice;
+                        const client = activeClients.find(c => c.adAccountId === selectedAccountId);
+                        const unifiedAvgPrice = parseFloat(client?.avgPrice || 0);
+                        const specificPrice = client?.campaignPrices?.[cmp.campaign_id];
+                        const campaignAvgPrice = specificPrice !== undefined && specificPrice !== null 
+                            ? parseFloat(specificPrice) 
+                            : unifiedAvgPrice;
+
+                        const effectiveRevenue = purchaseValue > 0 ? purchaseValue : purchases * campaignAvgPrice;
                         const roas = spend > 0 && effectiveRevenue > 0 ? effectiveRevenue / spend : 0;
 
                         const dailyBudget = cmp.daily_budget ? parseFloat(cmp.daily_budget) / 100 : 0;
@@ -163,7 +167,7 @@ const AdsPerformance = () => {
             loadMetaCampaigns();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedAccountId, dateRange.start?.toISOString(), dateRange.end?.toISOString(), selectedAccount?.avgPrice]);
+    }, [selectedAccountId, dateRange.start?.toISOString(), dateRange.end?.toISOString(), selectedAccount?.avgPrice, JSON.stringify(selectedAccount?.campaignPrices)]);
 
     // Filter campaigns by account (redundant for now with 1 account, but keeps structure)
     const accountCampaigns = liveCampaigns.filter(c => c.accountId === selectedAccountId);
@@ -208,11 +212,21 @@ const AdsPerformance = () => {
 
     const selectedCampaign = liveCampaigns.find(c => c.id === selectedCampaignId);
 
+    const [campaignAvgPrice, setCampaignAvgPrice] = React.useState('');
+    const [isEditingCampaignPrice, setIsEditingCampaignPrice] = React.useState(false);
+
     // Sync avgPrice input with the selected client's stored price
     React.useEffect(() => {
         const price = selectedAccount?.avgPrice;
         setAvgPrice(price !== undefined && price !== null ? String(price) : '');
-    }, [selectedAccount?.id]);
+    }, [selectedAccount?.id, selectedAccount?.avgPrice]);
+
+    // Sync campaign specific price
+    React.useEffect(() => {
+        if (!selectedCampaignId) return;
+        const price = selectedAccount?.campaignPrices?.[selectedCampaignId];
+        setCampaignAvgPrice(price !== undefined && price !== null ? String(price) : '');
+    }, [selectedCampaignId, JSON.stringify(selectedAccount?.campaignPrices)]);
 
     return (
         <div className="flex flex-col h-full bg-[--bg-app] animate-fade-in">
@@ -430,10 +444,10 @@ const AdsPerformance = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                {/* Average Treatment Price */}
-                                <div className="flex items-center gap-2.5 bg-[--bg-app] border border-[--border] rounded-xl px-4 py-2.5 min-w-[200px] transition-all duration-200 hover:border-[--primary]/40">
+                                {/* Unified Client Price */}
+                                <div className="flex items-center gap-2.5 bg-[--bg-app] border border-[--border] rounded-xl px-4 py-2.5 min-w-[180px] transition-all duration-200 hover:border-[--primary]/40">
                                     <div className="flex flex-col flex-1 gap-0.5">
-                                        <span className="text-[10px] font-bold text-[--text-muted] uppercase tracking-widest">Avg. Treatment Price</span>
+                                        <span className="text-[10px] font-bold text-[--text-muted] uppercase tracking-widest">Base Avg Price</span>
                                         {isEditingPrice ? (
                                             <div className="flex items-center gap-1">
                                                 <span className="text-sm font-semibold text-[--text-muted]">£</span>
@@ -454,7 +468,7 @@ const AdsPerformance = () => {
                                                         }
                                                         if (e.key === 'Escape') setIsEditingPrice(false);
                                                     }}
-                                                    className="w-24 bg-transparent text-sm font-bold text-[--text-main] outline-none placeholder:text-[--text-muted]/40"
+                                                    className="w-20 bg-transparent text-sm font-bold text-[--text-main] outline-none placeholder:text-[--text-muted]/40"
                                                 />
                                             </div>
                                         ) : (
@@ -464,26 +478,61 @@ const AdsPerformance = () => {
                                         )}
                                     </div>
                                     {isEditingPrice ? (
-                                        <button
-                                            onClick={() => {
+                                        <button onClick={() => {
                                                 const parsed = parseFloat(avgPrice);
                                                 const val = isNaN(parsed) ? null : parsed;
                                                 updateClient(selectedAccount.id, { avgPrice: val });
                                                 setIsEditingPrice(false);
-                                            }}
-                                            className="p-1.5 rounded-lg bg-[--primary]/10 text-[--primary] hover:bg-[--primary]/20 transition-colors flex-shrink-0"
-                                            title="Save"
-                                        >
-                                            <Check size={13} />
-                                        </button>
+                                            }} className="p-1.5 rounded-lg bg-[--primary]/10 text-[--primary] hover:bg-[--primary]/20"><Check size={13} /></button>
                                     ) : (
-                                        <button
-                                            onClick={() => setIsEditingPrice(true)}
-                                            className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--primary] hover:bg-[--primary]/10 transition-colors flex-shrink-0"
-                                            title="Edit price"
-                                        >
-                                            <Pencil size={13} />
-                                        </button>
+                                        <button onClick={() => setIsEditingPrice(true)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--primary] hover:bg-[--primary]/10"><Pencil size={13} /></button>
+                                    )}
+                                </div>
+
+                                {/* Campaign Specific Price Override */}
+                                <div className="flex items-center gap-2.5 bg-gradient-to-r from-[--bg-app] to-[--primary]/5 border border-[--border] rounded-xl px-4 py-2.5 min-w-[180px] transition-all duration-200 hover:border-[--primary]/40">
+                                    <div className="flex flex-col flex-1 gap-0.5">
+                                        <span className="text-[10px] font-bold text-[--primary] uppercase tracking-widest opacity-80">Campaign Override</span>
+                                        {isEditingCampaignPrice ? (
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-sm font-semibold text-[--text-muted]">£</span>
+                                                <input
+                                                    autoFocus
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    placeholder={avgPrice ? `${parseFloat(avgPrice).toFixed(2)}` : "0.00"}
+                                                    value={campaignAvgPrice}
+                                                    onChange={(e) => setCampaignAvgPrice(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            const parsed = parseFloat(campaignAvgPrice);
+                                                            const val = isNaN(parsed) ? null : parsed;
+                                                            const currentPrices = selectedAccount.campaignPrices || {};
+                                                            updateClient(selectedAccount.id, { campaignPrices: { ...currentPrices, [selectedCampaignId]: val } });
+                                                            setIsEditingCampaignPrice(false);
+                                                        }
+                                                        if (e.key === 'Escape') setIsEditingCampaignPrice(false);
+                                                    }}
+                                                    className="w-20 bg-transparent text-sm font-bold text-[--text-main] outline-none placeholder:text-[--text-muted]/40"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <span className="text-sm font-bold text-[--primary]">
+                                                {campaignAvgPrice ? `£${parseFloat(campaignAvgPrice).toFixed(2)}` : <span className="text-[--text-muted]/60 font-normal italic text-xs uppercase tracking-wider">Using Base Price</span>}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {isEditingCampaignPrice ? (
+                                        <button onClick={() => {
+                                                const parsed = parseFloat(campaignAvgPrice);
+                                                const val = isNaN(parsed) ? null : parsed;
+                                                const currentPrices = selectedAccount.campaignPrices || {};
+                                                updateClient(selectedAccount.id, { campaignPrices: { ...currentPrices, [selectedCampaignId]: val } });
+                                                setIsEditingCampaignPrice(false);
+                                            }} className="p-1.5 rounded-lg bg-[--primary]/10 text-[--primary] hover:bg-[--primary]/20"><Check size={13} /></button>
+                                    ) : (
+                                        <button onClick={() => setIsEditingCampaignPrice(true)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--primary] hover:bg-[--primary]/10"><Pencil size={13} /></button>
                                     )}
                                 </div>
 
@@ -502,7 +551,7 @@ const AdsPerformance = () => {
                         <AdsDashboard 
                             campaign={selectedCampaign} 
                             dateRange={dateRange} 
-                            avgPrice={selectedAccount?.avgPrice} 
+                            avgPrice={selectedAccount?.campaignPrices?.[selectedCampaignId] ?? selectedAccount?.avgPrice} 
                         />
 
                         {/* Campaign Matrix */}
