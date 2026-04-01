@@ -3,6 +3,8 @@ import { Filter, Plus, Edit2, Trash2, X, ExternalLink, Activity, Users, DollarSi
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import DateRangePicker from '../components/DateRangePicker';
+import { subDays } from 'date-fns';
 
 const FunnelsDashboard = () => {
     const { user } = useAuth();
@@ -10,8 +12,8 @@ const FunnelsDashboard = () => {
     const [funnels, setFunnels] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [dbError, setDbError] = useState(false);
-    const [dateRange, setDateRange] = useState('all');
-    const [sortOrder, setSortOrder] = useState('newest');
+    const [dateRange, setDateRange] = useState({ start: subDays(new Date(), 29), end: new Date() });
+    const [activeChip, setActiveChip] = useState('30D');
 
     // Modal State
     const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -26,7 +28,21 @@ const FunnelsDashboard = () => {
 
     useEffect(() => {
         if (user?.user_metadata?.app_settings?.defaultDateRange) {
-            setDateRange(user.user_metadata.app_settings.defaultDateRange);
+            const rangeStr = user.user_metadata.app_settings.defaultDateRange;
+            const end = new Date();
+            if (rangeStr === '7d') {
+                setDateRange({ start: subDays(end, 7), end });
+                setActiveChip('7D');
+            } else if (rangeStr === '30d') {
+                setDateRange({ start: subDays(end, 30), end });
+                setActiveChip('30D');
+            } else if (rangeStr === 'thisMonth') {
+                setDateRange({ start: new Date(end.getFullYear(), end.getMonth(), 1), end });
+                setActiveChip(null);
+            } else if (rangeStr === 'all') {
+                setDateRange({ start: new Date('2020-01-01'), end });
+                setActiveChip(null);
+            }
         }
         fetchFunnels();
     }, [user]);
@@ -182,20 +198,18 @@ const FunnelsDashboard = () => {
 
     const filterEventsByDateRange = (events, range) => {
         if (!events) return [];
-        if (range === 'all') return events;
+        if (!range || !range.start || !range.end) return events;
         
-        const now = new Date();
-        let startDate = new Date();
+        const startDate = new Date(range.start);
+        startDate.setHours(0, 0, 0, 0);
         
-        if (range === '7d') {
-            startDate.setDate(now.getDate() - 7);
-        } else if (range === '30d') {
-            startDate.setDate(now.getDate() - 30);
-        } else if (range === 'thisMonth') {
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        }
+        const endDate = new Date(range.end);
+        endDate.setHours(23, 59, 59, 999);
         
-        return events.filter(e => new Date(e.created_at) >= startDate);
+        return events.filter(e => {
+            const eventDate = new Date(e.created_at);
+            return eventDate >= startDate && eventDate <= endDate;
+        });
     };
 
     const getFunnelStats = (funnel) => {
@@ -211,10 +225,7 @@ const FunnelsDashboard = () => {
     };
 
     const sortedFunnels = [...funnels].sort((a, b) => {
-        if (sortOrder === 'newest') {
-            return new Date(b.created_at) - new Date(a.created_at);
-        }
-        return new Date(a.created_at) - new Date(b.created_at);
+        return new Date(b.created_at) - new Date(a.created_at);
     });
 
     if (dbError) {
@@ -250,32 +261,35 @@ const FunnelsDashboard = () => {
                         </p>
                     </div>
                     <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-                        {/* Sort Dropdown */}
-                        <div className="relative w-full md:w-auto bg-[--bg-surface] rounded-lg border border-[--border] flex items-center px-3">
-                            <ArrowDownUp size={16} className="text-[--text-muted]" />
-                            <select
-                                value={sortOrder}
-                                onChange={(e) => setSortOrder(e.target.value)}
-                                className="bg-transparent text-[--text-main] px-2 py-2 focus:outline-none appearance-none cursor-pointer text-sm w-full font-medium"
-                            >
-                                <option value="newest">Newest First</option>
-                                <option value="oldest">Oldest First</option>
-                            </select>
-                        </div>
-                        
-                        {/* Date Range Dropdown */}
-                        <div className="relative w-full md:w-auto bg-[--bg-surface] rounded-lg border border-[--border] flex items-center px-3">
-                            <Calendar size={16} className="text-[--text-muted]" />
-                            <select
-                                value={dateRange}
-                                onChange={(e) => setDateRange(e.target.value)}
-                                className="bg-transparent text-[--text-main] px-2 py-2 focus:outline-none appearance-none cursor-pointer text-sm w-full font-medium"
-                            >
-                                <option value="all">All Time</option>
-                                <option value="7d">Last 7 Days</option>
-                                <option value="30d">Last 30 Days</option>
-                                <option value="thisMonth">This Month</option>
-                            </select>
+                        {/* Date Picker */}
+                        <DateRangePicker 
+                            dateRange={dateRange} 
+                            onChange={(range) => { setDateRange(range); setActiveChip(null); }} 
+                        />
+
+                        {/* Quick-Click Date Chips */}
+                        <div className="flex items-center gap-1 bg-[--bg-surface] border border-[--border] rounded-lg p-1">
+                            {[
+                                { label: '7D', days: 7 },
+                                { label: '14D', days: 14 },
+                                { label: '30D', days: 30 },
+                            ].map(({ label, days }) => (
+                                <button
+                                    key={label}
+                                    onClick={() => {
+                                        const end = new Date();
+                                        const start = days ? subDays(new Date(), days) : new Date('2020-01-01');
+                                        setDateRange({ start, end });
+                                        setActiveChip(label);
+                                    }}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-150 ${activeChip === label
+                                        ? 'bg-[--primary] text-white shadow-sm'
+                                        : 'text-[--text-muted] hover:text-[--text-main] hover:bg-[--bg-card]'
+                                        }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
                         </div>
 
                         <button
