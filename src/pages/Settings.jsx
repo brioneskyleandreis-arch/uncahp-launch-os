@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Settings as SettingsIcon, Calendar, Save, Loader2, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, Calendar, Save, Loader2, Globe, ChevronDown, Check } from 'lucide-react';
+
+const PRESETS = [
+    { id: 'all', label: 'All Time (Max Available Data)' },
+    { id: '7d', label: 'Last 7 Days' },
+    { id: '30d', label: 'Last 30 Days' },
+    { id: 'thisMonth', label: 'This Month' }
+];
 
 const Settings = () => {
     const { user, updateProfile } = useAuth();
@@ -13,6 +20,9 @@ const Settings = () => {
         defaultDateRange: 'all', // '7d', '30d', 'thisMonth', 'all'
     });
 
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
     useEffect(() => {
         if (user && user.user_metadata?.app_settings) {
             setSettings({
@@ -21,6 +31,16 @@ const Settings = () => {
             });
         }
     }, [user]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleChange = (e) => {
         setSettings({
@@ -81,23 +101,45 @@ const Settings = () => {
                                     <p className="text-xs text-[--text-dim] mb-2 leading-relaxed">
                                         Choose the default time period loaded when you visit the analytics dashboards (Funnels, Ads). 
                                     </p>
-                                    <div className="relative">
-                                        <select
-                                            name="defaultDateRange"
-                                            value={settings.defaultDateRange}
-                                            onChange={handleChange}
-                                            className="w-full bg-[--bg-surface] border border-[--border] rounded-xl py-2.5 px-4 text-[--text-main] appearance-none focus:outline-none focus:ring-2 focus:ring-[--primary]/50 focus:border-[--primary] transition-all cursor-pointer"
+                                    <div className="relative" ref={dropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsOpen(!isOpen)}
+                                            className="w-full flex items-center justify-between gap-2 bg-[--bg-surface] border border-[--border] px-4 py-3 rounded-xl hover:border-[--primary] transition-all focus:outline-none focus:ring-2 focus:ring-[--primary]/50 shadow-sm group"
                                         >
-                                            <option value="all">All Time (Max Available Data)</option>
-                                            <option value="7d">Last 7 Days</option>
-                                            <option value="30d">Last 30 Days</option>
-                                            <option value="thisMonth">This Month</option>
-                                        </select>
-                                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-[--text-muted]">
-                                            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path>
-                                            </svg>
-                                        </div>
+                                            <div className="flex items-center gap-2 text-[--text-main]">
+                                                <Calendar size={18} className="text-[--primary] group-hover:scale-110 transition-transform" />
+                                                <span className="font-medium">
+                                                    {PRESETS.find(p => p.id === settings.defaultDateRange)?.label || 'Select Range'}
+                                                </span>
+                                            </div>
+                                            <ChevronDown size={18} className={`text-[--text-muted] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        {isOpen && (
+                                            <div className="absolute top-[calc(100%+8px)] right-0 left-0 bg-[--bg-card] border border-[--border] rounded-xl shadow-2xl z-50 overflow-hidden transform opacity-100 scale-100 transition-all origin-top">
+                                                <div className="py-2">
+                                                    {PRESETS.map((preset) => (
+                                                        <button
+                                                            key={preset.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                handleChange({ target: { name: 'defaultDateRange', value: preset.id } });
+                                                                setIsOpen(false);
+                                                            }}
+                                                            className="w-full text-left px-4 py-3 text-sm hover:bg-[--bg-surface] hover:text-[--primary] transition-colors flex items-center justify-between group"
+                                                        >
+                                                            <span className={`font-medium ${settings.defaultDateRange === preset.id ? 'text-[--primary]' : 'text-[--text-main] group-hover:text-[--primary]'}`}>
+                                                                {preset.label}
+                                                            </span>
+                                                            {settings.defaultDateRange === preset.id && (
+                                                                <Check size={16} className="text-[--primary] animate-in zoom-in" />
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
