@@ -1,18 +1,13 @@
 /**
- * Utility for fetching data directly from the Meta Graph API.
- * 
- * NOTE: For MVP and local development, we are using the Access Token 
- * exposed in standard VITE_ env vars. Before deploying to production, 
- * this fetch logic MUST be migrated to the Supabase Edge Function 
- * we wrote to prevent exposing the system token to the client bundle.
+ * Utility for fetching data from the Meta Graph API via our secure proxy.
  */
 
 import { format } from 'date-fns';
 
-const META_ACCESS_TOKEN = import.meta.env.VITE_META_ACCESS_TOKEN;
+// Notice: We no longer bundle the Meta Access Token to the client
 const DEFAULT_ACCOUNT_ID = import.meta.env.VITE_META_AD_ACCOUNT_ID;
-const API_VERSION = 'v19.0';
-const BASE_URL = `https://graph.facebook.com/${API_VERSION}`;
+// Route through our Vercel Serverless proxy API instead of directly fetching
+const BASE_URL = '/api/meta';
 
 // --- Caching Layer for Meta API ---
 const apiCache = new Map();
@@ -42,11 +37,12 @@ function setCachedData(key, data) {
  * We fetch standard metrics (spend, impressions) and configure the datePreset.
  */
 export async function fetchMetaCampaigns(accountId = DEFAULT_ACCOUNT_ID, dateRange = null) {
-    if (!META_ACCESS_TOKEN || !accountId) {
-        throw new Error('Missing Meta Access Token or Ad Account ID configuration.');
+    if (!accountId) {
+        throw new Error('Missing Ad Account ID configuration.');
     }
 
-    const endpoint = `${BASE_URL}/act_${accountId}/campaigns`;
+    // We pass the graph endpoint as a query parameter
+    const endpointParam = `act_${accountId}/campaigns`;
 
     let insightsQuery = 'insights.date_preset(maximum)';
     if (dateRange && dateRange.start && dateRange.end) {
@@ -56,7 +52,7 @@ export async function fetchMetaCampaigns(accountId = DEFAULT_ACCOUNT_ID, dateRan
     }
 
     const params = new URLSearchParams({
-        access_token: META_ACCESS_TOKEN,
+        endpoint: endpointParam,
         fields: `id,name,status,effective_status,daily_budget,lifetime_budget,stop_time,${insightsQuery}{spend,impressions,reach,actions,action_values,cost_per_action_type},ads.limit(1){creative{body,title,image_url,thumbnail_url,video_id,object_story_spec{video_data}}}`,
         filtering: JSON.stringify([{ field: 'effective_status', operator: 'IN', value: ['ACTIVE', 'PAUSED'] }])
     });
@@ -69,7 +65,7 @@ export async function fetchMetaCampaigns(accountId = DEFAULT_ACCOUNT_ID, dateRan
     }
 
     try {
-        const response = await fetch(`${endpoint}?${params.toString()}`);
+        const response = await fetch(`${BASE_URL}?${params.toString()}`);
         const data = await response.json();
 
         if (data.error) {
@@ -162,14 +158,14 @@ export async function fetchMetaCampaigns(accountId = DEFAULT_ACCOUNT_ID, dateRan
  * Fetches daily breakdown data for an ad account to power the trend charts.
  */
 export async function fetchMetaDailyTrends(campaignId, datePreset = 'last_90d') {
-    if (!META_ACCESS_TOKEN || !campaignId) {
-        throw new Error('Missing Meta Access Token or Campaign ID configuration.');
+    if (!campaignId) {
+        throw new Error('Missing Campaign ID configuration.');
     }
 
-    const endpoint = `${BASE_URL}/${campaignId}/insights`;
+    const endpointParam = `${campaignId}/insights`;
 
     const params = new URLSearchParams({
-        access_token: META_ACCESS_TOKEN,
+        endpoint: endpointParam,
         date_preset: datePreset,
         level: 'campaign',
         time_increment: '1', // Daily breakdown
@@ -185,7 +181,7 @@ export async function fetchMetaDailyTrends(campaignId, datePreset = 'last_90d') 
     }
 
     try {
-        const response = await fetch(`${endpoint}?${params.toString()}`);
+        const response = await fetch(`${BASE_URL}?${params.toString()}`);
         const data = await response.json();
 
         if (data.error) {
@@ -216,7 +212,11 @@ export const fetchVideoSource = async (videoId) => {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/${videoId}?access_token=${META_ACCESS_TOKEN}&fields=source`);
+        const params = new URLSearchParams({
+            endpoint: videoId,
+            fields: 'source'
+        });
+        const response = await fetch(`${BASE_URL}?${params.toString()}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
