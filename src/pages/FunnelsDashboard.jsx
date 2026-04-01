@@ -463,10 +463,10 @@ const FunnelsDashboard = () => {
                             
                             <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-2 duration-300">
                                 <h3 className="text-sm font-bold text-[--text-main] uppercase tracking-wider border-b border-[--border] pb-2 flex items-center gap-2">
-                                    <Code size={16} /> GHL Tracking Scripts
+                                    <Code size={16} /> Universal Tracking Scripts
                                 </h3>
                                     <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-sm text-[--text-main]">
-                                        <p className="mb-2"><strong>How to use:</strong> Paste these JavaScript snippets into the <strong>Tracking Code &gt; Footer Code</strong> or <strong>Head Code</strong> of your specific funnel steps inside GoHighLevel.</p>
+                                        <p className="mb-2"><strong>How to use:</strong> Paste these JavaScript snippets anywhere inside the <strong>&lt;head&gt;</strong> or before the closing <strong>&lt;/body&gt;</strong> tag of your specific page/funnel step. They work across any platform (Webflow, WordPress, Shopify, GHL, etc).</p>
                                         <ul className="list-disc pl-5 text-[--text-muted] text-xs">
                                             <li>Do not put them globally across the whole funnel, put them on the specific step.</li>
                                             <li>These instantly fire asynchronous background hits securely to this Supabase database.</li>
