@@ -4,10 +4,10 @@ import { Calendar as CalendarIcon, ChevronDown, Check } from 'lucide-react';
 
 const PRESETS = [
     { label: 'Yesterday', getValue: () => ({ start: subDays(new Date(), 1), end: subDays(new Date(), 1) }) },
-    { label: 'Last 7 days', getValue: () => ({ start: subDays(new Date(), 7), end: subDays(new Date(), 1) }) },
-    { label: 'Last 14 days', getValue: () => ({ start: subDays(new Date(), 14), end: subDays(new Date(), 1) }) },
-    { label: 'Last 30 days', getValue: () => ({ start: subDays(new Date(), 30), end: subDays(new Date(), 1) }) },
-    { label: 'This month', getValue: () => ({ start: startOfMonth(new Date()), end: subDays(new Date(), 1) }) },
+    { label: 'Last 7 days', getValue: () => ({ start: subDays(new Date(), 7), end: new Date() }) },
+    { label: 'Last 14 days', getValue: () => ({ start: subDays(new Date(), 14), end: new Date() }) },
+    { label: 'Last 30 days', getValue: () => ({ start: subDays(new Date(), 30), end: new Date() }) },
+    { label: 'This month', getValue: () => ({ start: startOfMonth(new Date()), end: new Date() }) },
     { label: 'Last month', getValue: () => ({ start: startOfMonth(subMonths(new Date(), 1)), end: endOfMonth(subMonths(new Date(), 1)) }) },
 ];
 

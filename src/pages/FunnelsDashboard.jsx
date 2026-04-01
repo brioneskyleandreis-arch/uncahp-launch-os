@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Plus, Edit2, Trash2, X, ExternalLink, Activity, Users, DollarSign, Loader2, Settings, Code, Copy, CheckCircle2, ChevronRight, Calendar, ArrowDownUp } from 'lucide-react';
+import { Filter, Plus, Edit2, Trash2, X, ExternalLink, Activity, Users, DollarSign, Loader2, Settings, Code, Copy, CheckCircle2, ChevronRight, Calendar, ArrowDownUp, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
@@ -157,6 +157,19 @@ const FunnelsDashboard = () => {
             setFunnels(f => f.filter(funnel => funnel.id !== id));
         } catch (error) {
             addToast(`Failed to delete: ${error.message}`, 'error');
+        }
+    };
+
+    const handleResetStats = async (id, name) => {
+        if (!window.confirm(`Are you sure you want to completely clear all analytics stats (views, leads, purchases) for "${name}"? This action is useful for switching from Testing to Live and cannot be undone.`)) return;
+
+        try {
+            const { error } = await supabase.from('funnel_events').delete().eq('funnel_id', id);
+            if (error) throw error;
+            addToast('Funnel stats reset successfully.', 'success');
+            fetchFunnels();
+        } catch (error) {
+            addToast(`Failed to reset stats: ${error.message}`, 'error');
         }
     };
 
@@ -341,6 +354,13 @@ const FunnelsDashboard = () => {
                                             </a>
                                         </div>
                                         <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleResetStats(funnel.id, funnel.name)}
+                                                className="p-1.5 bg-[--bg-surface] hover:bg-orange-500/10 text-[--text-muted] hover:text-orange-400 rounded-lg transition-colors border border-[--border] opacity-0 group-hover:opacity-100"
+                                                title="Reset Stats"
+                                            >
+                                                <RefreshCw size={16} />
+                                            </button>
                                             <button
                                                 onClick={() => handleOpenConfig(funnel)}
                                                 className="p-1.5 bg-[--bg-surface] hover:bg-[#f48ccf]/10 text-[--text-muted] hover:text-[#f48ccf] rounded-lg transition-colors border border-[--border]"
