@@ -444,55 +444,10 @@ const AdsPerformance = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                {/* Unified Client Price */}
-                                <div className="flex items-center gap-2.5 bg-[--bg-app] border border-[--border] rounded-xl px-4 py-2.5 min-w-[180px] transition-all duration-200 hover:border-[--primary]/40">
-                                    <div className="flex flex-col flex-1 gap-0.5">
-                                        <span className="text-[10px] font-bold text-[--text-muted] uppercase tracking-widest">Base Avg Price</span>
-                                        {isEditingPrice ? (
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-sm font-semibold text-[--text-muted]">£</span>
-                                                <input
-                                                    autoFocus
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.01"
-                                                    placeholder="0.00"
-                                                    value={avgPrice}
-                                                    onChange={(e) => setAvgPrice(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            const parsed = parseFloat(avgPrice);
-                                                            const val = isNaN(parsed) ? null : parsed;
-                                                            updateClient(selectedAccount.id, { avgPrice: val });
-                                                            setIsEditingPrice(false);
-                                                        }
-                                                        if (e.key === 'Escape') setIsEditingPrice(false);
-                                                    }}
-                                                    className="w-20 bg-transparent text-sm font-bold text-[--text-main] outline-none placeholder:text-[--text-muted]/40"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <span className="text-sm font-bold text-[--text-main]">
-                                                {avgPrice ? `£${parseFloat(avgPrice).toFixed(2)}` : <span className="text-[--text-muted] font-normal italic text-xs">Not set</span>}
-                                            </span>
-                                        )}
-                                    </div>
-                                    {isEditingPrice ? (
-                                        <button onClick={() => {
-                                                const parsed = parseFloat(avgPrice);
-                                                const val = isNaN(parsed) ? null : parsed;
-                                                updateClient(selectedAccount.id, { avgPrice: val });
-                                                setIsEditingPrice(false);
-                                            }} className="p-1.5 rounded-lg bg-[--primary]/10 text-[--primary] hover:bg-[--primary]/20"><Check size={13} /></button>
-                                    ) : (
-                                        <button onClick={() => setIsEditingPrice(true)} className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--primary] hover:bg-[--primary]/10"><Pencil size={13} /></button>
-                                    )}
-                                </div>
-
                                 {/* Campaign Specific Price Override */}
-                                <div className="flex items-center gap-2.5 bg-gradient-to-r from-[--bg-app] to-[--primary]/5 border border-[--border] rounded-xl px-4 py-2.5 min-w-[180px] transition-all duration-200 hover:border-[--primary]/40">
+                                <div className="flex items-center gap-2.5 bg-[--bg-app] border border-[--border] rounded-xl px-4 py-2.5 min-w-[200px] transition-all duration-200 hover:border-[--primary]/40">
                                     <div className="flex flex-col flex-1 gap-0.5">
-                                        <span className="text-[10px] font-bold text-[--primary] uppercase tracking-widest opacity-80">Campaign Override</span>
+                                        <span className="text-[10px] font-bold text-[--text-muted] uppercase tracking-widest">Avg. Treatment Price</span>
                                         {isEditingCampaignPrice ? (
                                             <div className="flex items-center gap-1">
                                                 <span className="text-sm font-semibold text-[--text-muted]">£</span>
@@ -518,8 +473,8 @@ const AdsPerformance = () => {
                                                 />
                                             </div>
                                         ) : (
-                                            <span className="text-sm font-bold text-[--primary]">
-                                                {campaignAvgPrice ? `£${parseFloat(campaignAvgPrice).toFixed(2)}` : <span className="text-[--text-muted]/60 font-normal italic text-xs uppercase tracking-wider">Using Base Price</span>}
+                                            <span className="text-sm font-bold text-[--text-main]">
+                                                {campaignAvgPrice ? `£${parseFloat(campaignAvgPrice).toFixed(2)}` : <span className="text-[--text-muted] font-normal italic text-xs">Not set</span>}
                                             </span>
                                         )}
                                     </div>
