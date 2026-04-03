@@ -15,7 +15,8 @@ import {
     Sun,
     Moon,
     User,
-    Filter
+    Filter,
+    Check
 } from 'lucide-react';
 import { SiMeta } from '@icons-pack/react-simple-icons';
 import { useAuth } from '../context/AuthContext';
@@ -61,7 +62,7 @@ const AppLayout = () => {
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div
                     className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[100px] opacity-20"
-                    style={{ background: 'radial-gradient(circle, #f48ccf 0%, transparent 70%)' }}
+                    style={{ background: 'radial-gradient(circle, #f472d0 0%, transparent 70%)' }}
                 />
                 <div
                     className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[100px] opacity-20"
@@ -186,7 +187,7 @@ const AppLayout = () => {
                             >
                                 <Bell size={20} />
                                 {unreadCount > 0 && (
-                                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-[#f48ccf] rounded-full border border-[--bg-app]"></span>
+                                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-[#f472d0] rounded-full border border-[--bg-app]"></span>
                                 )}
                             </button>
 
@@ -252,7 +253,7 @@ const AppLayout = () => {
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                                 className="flex items-center gap-2 focus:outline-none"
                             >
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f48ccf] to-[#c084fc] flex items-center justify-center text-white font-bold text-xs ring-2 ring-[--bg-app] ring-offset-2 ring-offset-[#f48ccf]/10 transition-all hover:ring-offset-[#f48ccf]/30 overflow-hidden">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f472d0] to-[#c084fc] flex items-center justify-center text-white font-bold text-xs ring-2 ring-[--bg-app] ring-offset-2 ring-offset-[#f472d0]/10 transition-all hover:ring-offset-[#f472d0]/30 overflow-hidden">
                                     {user?.user_metadata?.avatar_url ? (
                                         <img
                                             src={user.user_metadata.avatar_url}

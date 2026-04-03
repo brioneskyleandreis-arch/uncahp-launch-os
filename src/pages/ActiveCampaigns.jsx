@@ -312,15 +312,15 @@ const ActiveCampaigns = () => {
                                 <div key={group.clientName} className="bg-[--bg-surface] border border-[--border] rounded-xl overflow-hidden shadow-sm">
                                     {/* Client Header */}
                                     <div className="bg-[--bg-card] border-b border-[--border] px-6 py-4 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
                                             {group.clientLogo ? (
-                                                <img src={group.clientLogo} alt={group.clientName} className="w-8 h-8 rounded-lg object-cover shadow-sm border border-[--border]" />
+                                                <img src={group.clientLogo} alt={group.clientName} className="w-8 h-8 rounded-lg object-cover shadow-sm border border-[--border] flex-shrink-0" />
                                             ) : (
-                                                <div className="w-8 h-8 rounded-lg bg-[--bg-app] flex items-center justify-center border border-[--border] shadow-sm">
+                                                <div className="w-8 h-8 rounded-lg bg-[--bg-app] flex items-center justify-center border border-[--border] shadow-sm flex-shrink-0">
                                                     <Layers size={14} className="text-[--text-muted]" />
                                                 </div>
                                             )}
-                                            <h2 className="font-bold text-base text-[--text-main]">{group.clientName}</h2>
+                                            <h2 className="font-bold text-base text-[--text-main] truncate whitespace-nowrap">{group.clientName}</h2>
                                         </div>
                                         <div className="text-xs text-[--text-muted] font-semibold bg-[--bg-app] px-2.5 py-1 rounded border border-[--border]">
                                             {group.campaigns.length} Campaign{group.campaigns.length !== 1 && 's'}
@@ -342,8 +342,8 @@ const ActiveCampaigns = () => {
                                                     <th className="px-4 py-3 text-xs font-bold text-[--text-muted] tracking-wider uppercase select-none text-right">
                                                         CPL ({activeChip || 'Custom'})
                                                     </th>
-                                                    <th className="px-4 py-3 text-xs font-bold text-[--text-muted] tracking-wider uppercase select-none text-right">
-                                                        Budget
+                                                    <th className="px-4 py-3 text-xs font-bold text-[--text-muted] tracking-wider uppercase select-none w-24">
+                                                        Source
                                                     </th>
                                                     <th className="px-4 py-3 text-xs font-bold text-[--text-muted] tracking-wider uppercase select-none w-48">
                                                         Ad Preview Link
@@ -402,17 +402,31 @@ const ActiveCampaigns = () => {
 
                                                             {/* CPL */}
                                                             <td className="px-4 py-5 text-right">
-                                                                <div className="text-sm font-semibold text-[--text-main]">
+                                                                <div className={`text-sm font-semibold flex flex-col items-end ${
+                                                                    actions.source === 'LF' && cmp.costPerResult > 0 ? (cmp.costPerResult < 7.50 ? 'text-emerald-400' : 'text-rose-400') :
+                                                                    actions.source === 'LP' && cmp.costPerResult > 0 ? (cmp.costPerResult < 15 ? 'text-emerald-400' : 'text-rose-400') :
+                                                                    'text-[--text-main]'
+                                                                }`}>
                                                                     {cmp.costPerResult > 0 ? '£' + cmp.costPerResult.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
                                                                 </div>
                                                             </td>
 
-                                                            {/* Budget */}
-                                                            <td className="px-4 py-5 text-right">
-                                                                <div className="text-sm text-[--text-main]">
-                                                                    {cmp.budget ? '£' + cmp.budget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
-                                                                    <span className="text-[10px] text-[--text-muted] ml-1 uppercase block">/{cmp.budgetType === 'daily' ? 'day' : 'total'}</span>
-                                                                </div>
+                                                            <td className="px-4 py-5">
+                                                                <select
+                                                                    value={actions.source || ''}
+                                                                    onChange={(e) => handleActionChange(cmp.id, 'source', e.target.value)}
+                                                                    className={`w-full border rounded-md px-2 py-1.5 text-xs font-bold outline-none transition-colors cursor-pointer appearance-none text-center ${
+                                                                        actions.source === 'LF' 
+                                                                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20' 
+                                                                            : actions.source === 'LP' 
+                                                                                ? 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' 
+                                                                                : 'bg-[rgba(255,255,255,0.03)] text-[--text-main] border-transparent hover:border-[--border]'
+                                                                    }`}
+                                                                >
+                                                                    <option value="" className="bg-[--bg-card] text-[--text-main]">Select...</option>
+                                                                    <option value="LF" className="bg-[--bg-card] text-blue-400 font-bold">LF</option>
+                                                                    <option value="LP" className="bg-[--bg-card] text-purple-400 font-bold">LP</option>
+                                                                </select>
                                                             </td>
 
                                                             {/* Ad Preview Link */}

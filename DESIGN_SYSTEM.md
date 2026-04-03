@@ -13,7 +13,7 @@ The application uses CSS variables defined in `/src/index.css` for consistent th
 - **Surface Hover:** `#222329` (`var(--bg-surface-hover)`) - Interactive states for surface elements.
 
 ### Brand Colors
-- **Primary:** `#f48ccf` (`var(--primary)`) - The primary signature pink gradient color used for buttons and accents.
+- **Primary:** `#f472d0` (`var(--primary)`) - The primary signature pink gradient color used for buttons and accents.
 - **Primary Hover:** `#e060b0` (`var(--primary-hover)`)
 - **Secondary:** `#8b5cf6` (`var(--secondary)`) - A complementary purple used for gradients and subtle accents.
 

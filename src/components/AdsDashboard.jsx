@@ -1,10 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, BarChart, Bar } from 'recharts';
 import { format, isWithinInterval, startOfDay, endOfDay, eachDayOfInterval } from 'date-fns';
 import { fetchMetaDailyTrends } from '../lib/metaApi';
 
-const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
+const AdsDashboard = ({ campaign, accountCampaigns = [], dateRange, avgPrice = 0 }) => {
     if (!campaign) return null;
 
     const [dailyData, setDailyData] = useState([]);
@@ -41,6 +41,7 @@ const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
                     const clicks = clicksAction ? parseInt(clicksAction.value) : 0;
                     const impressions = parseInt(day.impressions || 0);
                     const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+                    const cpc = clicks > 0 ? spend / clicks : 0;
 
                     const purchaseTypesPriority = ['purchase', 'offsite_conversion.fb_pixel_purchase'];
                     let purchases = 0;
@@ -75,6 +76,7 @@ const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
                         results,
                         costPerResult,
                         ctr,
+                        cpc,
                         impressions,
                         clicks,
                         purchases,
@@ -127,7 +129,7 @@ const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
                 currentRevenue += existingData.revenue || 0;
                 return existingData;
             }
-            return { date: formattedDateStr, spend: 0, results: 0, costPerResult: 0, ctr: 0, impressions: 0, clicks: 0, purchases: 0, revenue: 0, cpp: 0, roas: 0 };
+            return { date: formattedDateStr, spend: 0, results: 0, costPerResult: 0, ctr: 0, cpc: 0, impressions: 0, clicks: 0, purchases: 0, revenue: 0, cpp: 0, roas: 0 };
         });
 
         // Calculate previous period stats for trend arrows
@@ -186,6 +188,30 @@ const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
     const { totals, chartData } = processedData;
     const hasData = chartData.length > 0;
 
+    const campaignComparisonData = useMemo(() => {
+        return accountCampaigns
+            .map(c => ({
+                name: c.name?.length > 12 ? c.name.substring(0, 12) + '...' : c.name,
+                fullName: c.name,
+                spend: c.amountSpent || 0,
+                leads: c.results || 0
+            }))
+            .sort((a, b) => b.spend - a.spend);
+    }, [accountCampaigns]);
+
+    const CustomXAxisTick = ({ x, y, payload }) => {
+        const campaign = campaignComparisonData.find(c => c.name === payload.value);
+        const fullName = campaign ? campaign.fullName : payload.value;
+        return (
+            <g transform={`translate(${x},${y})`}>
+                <title>{fullName}</title>
+                <text x={0} y={0} dy={16} textAnchor="middle" fill="var(--text-muted)" fontSize={11}>
+                    {payload.value}
+                </text>
+            </g>
+        );
+    };
+
     const formatCurrency = (val) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(val);
     const formatNumber = (val) => val ? new Intl.NumberFormat('en-US').format(val) : '0';
 
@@ -242,14 +268,8 @@ const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
                         <h3 className="text-sm font-bold text-[--text-muted] uppercase tracking-wide mb-4">{campaign.resultType} Over Time</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={chartData}>
-                                    <defs>
-                                        <linearGradient id="colorResults" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#f48ccf" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#f48ccf" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
+                                <BarChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} vertical={false} />
                                     <XAxis
                                         dataKey="date"
                                         tickFormatter={(str) => format(new Date(str), 'MMM d')}
@@ -259,107 +279,113 @@ const AdsDashboard = ({ campaign, dateRange, avgPrice = 0 }) => {
                                     <YAxis stroke="var(--text-muted)" fontSize={12} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                                        labelStyle={{ color: 'var(--text-main)' }}
+                                        labelStyle={{ color: 'var(--text-main)', marginBottom: '8px', fontWeight: 'bold' }}
                                     />
-                                    <Legend />
-                                    <Area type="monotone" dataKey="results" stroke="#f48ccf" fill="url(#colorResults)" name={campaign.resultType} />
-                                </AreaChart>
+                                    <Legend iconType="circle" />
+                                    <Bar dataKey="results" fill="#f472d0" radius={[4, 4, 0, 0]} name={campaign.resultType} />
+                                </BarChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
 
-                    {/* CPL Trend Chart */}
+                    {/* Creative Fatigue (CTR vs CPC) */}
                     <div className="bg-[--bg-surface] border border-[--border] p-4 rounded-xl shadow-sm">
-                        <h3 className="text-sm font-bold text-[--text-muted] uppercase tracking-wide mb-4">CPL Trend</h3>
+                        <h3 className="text-sm font-bold text-[--text-muted] uppercase tracking-wide mb-4">Creative Fatigue (CTR vs CPC)</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
+                                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} vertical={false} />
                                     <XAxis
                                         dataKey="date"
                                         tickFormatter={(str) => format(new Date(str), 'MMM d')}
                                         stroke="var(--text-muted)"
                                         fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
                                     />
-                                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(val) => formatCurrency(val)} />
+                                    <YAxis 
+                                        yAxisId="left"
+                                        stroke="var(--text-muted)" 
+                                        fontSize={12} 
+                                        tickFormatter={(val) => `${val.toFixed(2)}%`} 
+                                        tickLine={false} 
+                                        axisLine={false} 
+                                        orientation="left"
+                                    />
+                                    <YAxis 
+                                        yAxisId="right"
+                                        stroke="var(--text-muted)" 
+                                        fontSize={12} 
+                                        tickFormatter={(val) => formatCurrency(val)} 
+                                        tickLine={false} 
+                                        axisLine={false} 
+                                        orientation="right"
+                                    />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                                        cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '3 3' }}
-                                        formatter={(val) => formatCurrency(val)}
+                                        labelStyle={{ color: 'var(--text-main)', marginBottom: '8px', fontWeight: 'bold' }}
+                                        formatter={(val, name) => {
+                                            if (name === 'CTR') return [`${parseFloat(val).toFixed(2)}%`, name];
+                                            return [formatCurrency(val), name];
+                                        }}
                                     />
                                     <Legend
                                         verticalAlign="bottom"
                                         height={36}
-                                        iconType="line"
+                                        iconType="circle"
                                         formatter={(value) => <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'bold' }}>{value.toUpperCase()}</span>}
                                     />
-                                    <Line type="monotone" dataKey="costPerResult" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 4, strokeWidth: 2, stroke: 'var(--bg-card)' }} activeDot={{ r: 6, strokeWidth: 0 }} name="CPL" />
+                                    <Line yAxisId="left" type="monotone" dataKey="ctr" stroke="#0ea5e9" strokeWidth={3} name="CTR" dot={false} activeDot={{ r: 6, fill: '#0ea5e9', stroke: '#fff', strokeWidth: 2 }} />
+                                    <Line yAxisId="right" type="monotone" dataKey="cpc" stroke="#f472d0" strokeWidth={3} name="CPC" dot={false} activeDot={{ r: 6, fill: '#f472d0', stroke: '#fff', strokeWidth: 2 }} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
 
-                    {/* Purchases Over Time Chart */}
-                    <div className="bg-[--bg-surface] border border-[--border] p-4 rounded-xl shadow-sm">
-                        <h3 className="text-sm font-bold text-[--text-muted] uppercase tracking-wide mb-4">Bookings Over Time</h3>
-                        <div className="h-64">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={chartData}>
-                                    <defs>
-                                        <linearGradient id="colorPurchases" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
-                                    <XAxis
-                                        dataKey="date"
-                                        tickFormatter={(str) => format(new Date(str), 'MMM d')}
-                                        stroke="var(--text-muted)"
-                                        fontSize={12}
-                                    />
-                                    <YAxis stroke="var(--text-muted)" fontSize={12} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                                        labelStyle={{ color: 'var(--text-main)' }}
-                                    />
-                                    <Legend />
-                                    <Area type="monotone" dataKey="purchases" stroke="#10b981" fill="url(#colorPurchases)" name="Bookings" />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                    {/* Spend per Campaign vs Leads Generated (Spanning Bar Graph) */}
+                    {accountCampaigns.length > 0 && (
+                        <div className="lg:col-span-2 bg-[--bg-surface] border border-[--border] p-4 rounded-xl shadow-sm">
+                            <h3 className="text-sm font-bold text-[--text-muted] uppercase tracking-wide mb-4">Spend vs Leads (All Campaigns)</h3>
+                            <div className="h-[400px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={campaignComparisonData} margin={{ top: 10, right: 10, left: 10, bottom: 40 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} vertical={false} />
+                                        <XAxis
+                                            dataKey="name"
+                                            stroke="var(--text-muted)"
+                                            fontSize={11}
+                                            interval={0}
+                                            tick={<CustomXAxisTick />}
+                                        />
+                                        <YAxis
+                                            yAxisId="left"
+                                            orientation="left"
+                                            stroke="var(--text-muted)"
+                                            fontSize={12}
+                                            tickFormatter={(val) => `£${val}`}
+                                        />
+                                        <YAxis
+                                            yAxisId="right"
+                                            orientation="right"
+                                            stroke="var(--text-muted)"
+                                            fontSize={12}
+                                        />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px' }}
+                                            labelStyle={{ color: 'var(--text-main)', marginBottom: '8px', fontWeight: 'bold' }}
+                                            formatter={(val, name) => {
+                                                if (name === 'Spend') return [formatCurrency(val), name];
+                                                return [formatNumber(val), name];
+                                            }}
+                                        />
+                                        <Legend verticalAlign="top" height={36} iconType="circle" />
+                                        <Bar yAxisId="left" dataKey="spend" fill="#94a3b8" radius={[4, 4, 0, 0]} name="Spend" />
+                                        <Bar yAxisId="right" dataKey="leads" fill="#f472d0" radius={[4, 4, 0, 0]} name="Leads Generated" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* ROAS Trend Chart */}
-                    <div className="bg-[--bg-surface] border border-[--border] p-4 rounded-xl shadow-sm">
-                        <h3 className="text-sm font-bold text-[--text-muted] uppercase tracking-wide mb-4">ROAS Trend</h3>
-                        <div className="h-64">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
-                                    <XAxis
-                                        dataKey="date"
-                                        tickFormatter={(str) => format(new Date(str), 'MMM d')}
-                                        stroke="var(--text-muted)"
-                                        fontSize={12}
-                                    />
-                                    <YAxis stroke="var(--text-muted)" fontSize={12} tickFormatter={(val) => `${val.toFixed(1)}x`} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)', borderRadius: '8px' }}
-                                        cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '3 3' }}
-                                        formatter={(val) => `${val.toFixed(2)}x`}
-                                    />
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={36}
-                                        iconType="line"
-                                        formatter={(value) => <span style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 'bold' }}>{value.toUpperCase()}</span>}
-                                    />
-                                    <Line type="monotone" dataKey="roas" stroke="#f59e0b" strokeWidth={3} dot={{ fill: '#f59e0b', r: 4, strokeWidth: 2, stroke: 'var(--bg-card)' }} activeDot={{ r: 6, strokeWidth: 0 }} name="ROAS" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
+                    )}
                 </div>
             ) : (
                 <div className="h-64 flex items-center justify-center bg-[--bg-surface] border border-[--border] rounded-xl text-[--text-muted]">

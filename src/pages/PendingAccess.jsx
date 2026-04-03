@@ -11,7 +11,7 @@ const PendingAccess = () => {
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div
                     className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[120px] opacity-10"
-                    style={{ background: 'radial-gradient(circle, #f48ccf 0%, transparent 70%)' }}
+                    style={{ background: 'radial-gradient(circle, #f472d0 0%, transparent 70%)' }}
                 />
                 <div
                     className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[120px] opacity-10"

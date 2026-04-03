@@ -73,7 +73,7 @@ const ClientList = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-2xl font-bold text-[--text-main] flex items-center gap-3">
-                            <Briefcase className="text-[#f48ccf]" />
+                            <Briefcase className="text-[#f472d0]" />
                             Client Management
                         </h1>
                         <p className="text-sm text-[--text-muted] mt-1">
@@ -82,7 +82,7 @@ const ClientList = () => {
                     </div>
                     <button
                         onClick={() => handleOpenModal()}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#f48ccf] to-[#c084fc] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#f472d0] to-[#c084fc] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
                     >
                         <Plus size={18} />
                         Add Client
@@ -136,7 +136,7 @@ const ClientList = () => {
                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                                     <button
                                         onClick={() => handleOpenModal(client)}
-                                        className="p-1.5 bg-[--bg-surface] hover:bg-[#f48ccf]/20 text-[--text-muted] hover:text-[#f48ccf] rounded-md transition-colors border border-[--border] hover:border-[#f48ccf]/30 shadow-sm"
+                                        className="p-1.5 bg-[--bg-surface] hover:bg-[#f472d0]/20 text-[--text-muted] hover:text-[#f472d0] rounded-md transition-colors border border-[--border] hover:border-[#f472d0]/30 shadow-sm"
                                         title="Edit Client"
                                     >
                                         <Edit2 size={14} />
@@ -218,7 +218,7 @@ const ClientList = () => {
                                         value={formData.name}
                                         onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                                         placeholder="e.g. Acme Corp"
-                                        className="w-full bg-[--bg-surface] border border-[--border] text-[--text-main] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#f48ccf] transition-colors"
+                                        className="w-full bg-[--bg-surface] border border-[--border] text-[--text-main] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#f472d0] transition-colors"
                                         autoFocus
                                     />
                                 </div>
@@ -231,7 +231,7 @@ const ClientList = () => {
                                         value={formData.adAccountId}
                                         onChange={(e) => setFormData(p => ({ ...p, adAccountId: e.target.value }))}
                                         placeholder="Numeric ID only (e.g. 123456789)"
-                                        className="w-full bg-[--bg-surface] border border-[--border] text-[--text-main] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#f48ccf] transition-colors font-mono text-sm"
+                                        className="w-full bg-[--bg-surface] border border-[--border] text-[--text-main] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#f472d0] transition-colors font-mono text-sm"
                                     />
                                     <p className="text-[10px] text-[--text-muted] mt-1.5">
                                         You can find this in your Meta Business Settings.
@@ -239,7 +239,7 @@ const ClientList = () => {
                                 </div>
                                 <div className="mt-2">
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <div className={`relative w-10 h-5 transition-colors rounded-full ${formData.status === 'ACTIVE' ? 'bg-[#f48ccf]' : 'bg-[--border]'}`}>
+                                        <div className={`relative w-10 h-5 transition-colors rounded-full ${formData.status === 'ACTIVE' ? 'bg-[#f472d0]' : 'bg-[--border]'}`}>
                                             <div className={`absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${formData.status === 'ACTIVE' ? 'translate-x-5' : 'translate-x-0'}`}></div>
                                         </div>
                                         <span className="text-sm font-medium text-[--text-main]">
@@ -257,7 +257,7 @@ const ClientList = () => {
 
                             <button
                                 type="submit"
-                                className="w-full bg-gradient-to-r from-[#f48ccf] to-[#c084fc] text-white font-medium py-3 px-4 rounded-lg hover:opacity-90 transition-opacity mt-4 flex items-center justify-center gap-2"
+                                className="w-full bg-gradient-to-r from-[#f472d0] to-[#c084fc] text-white font-medium py-3 px-4 rounded-lg hover:opacity-90 transition-opacity mt-4 flex items-center justify-center gap-2"
                             >
                                 <CheckCircle2 size={18} />
                                 {editingClient ? 'Save Changes' : 'Create Client'}

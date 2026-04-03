@@ -472,7 +472,7 @@ export const LaunchProvider = ({ children }) => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen w-full bg-[#0f1014] text-white flex-col gap-4">
-                <div className="w-8 h-8 border-4 border-[#f48ccf] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-[#f472d0] border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-sm font-medium animate-pulse">Initializing UNCAHP OS...</p>
             </div>
         );

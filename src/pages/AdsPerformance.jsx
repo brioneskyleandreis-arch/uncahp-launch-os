@@ -505,6 +505,7 @@ const AdsPerformance = () => {
                         {/* The Dashboard */}
                         <AdsDashboard 
                             campaign={selectedCampaign} 
+                            accountCampaigns={accountCampaigns}
                             dateRange={dateRange} 
                             avgPrice={selectedAccount?.campaignPrices?.[selectedCampaignId] ?? selectedAccount?.avgPrice} 
                         />
@@ -541,44 +542,38 @@ const AdsPerformance = () => {
                                     if (topScrollRef.current) topScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
                                 }}
                             >
-                                <table className="w-full text-left min-w-max whitespace-nowrap">
+                                <table className="w-full text-left whitespace-nowrap xl:min-w-0">
                                     <thead>
                                         <tr className="bg-[--bg-card] border-b border-[--border]">
                                             {/* Frozen first column */}
                                             <th
-                                                className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase cursor-pointer hover:text-[--text-main] transition-colors group select-none sticky left-0 z-10 bg-[--bg-card] shadow-[2px_0_6px_-2px_rgba(0,0,0,0.3)]"
+                                                className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase cursor-pointer hover:text-[--text-main] transition-colors group select-none sticky left-0 z-10 bg-[--bg-card] shadow-[2px_0_6px_-2px_rgba(0,0,0,0.3)]"
                                                 onClick={() => requestSort('name')}
                                             >
                                                 <div className="flex items-center gap-1.5">Campaign Name {getSortIcon('name')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('effective_status')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('effective_status')}>
                                                 <div className="flex items-center gap-1.5">Status {getSortIcon('effective_status')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('results')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('results')}>
                                                 <div className="flex items-center justify-center gap-1.5">Results {getSortIcon('results')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('costPerResult')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('costPerResult')}>
                                                 <div className="flex items-center justify-center gap-1.5">Cost per Result {getSortIcon('costPerResult')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('budget')}>
-                                                <div className="flex items-center justify-center gap-1.5">Budget {getSortIcon('budget')}</div>
-                                            </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('amountSpent')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('amountSpent')}>
                                                 <div className="flex items-center justify-center gap-1.5">Amount Spent {getSortIcon('amountSpent')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('purchases')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('purchases')}>
                                                 <div className="flex items-center justify-center gap-1.5">Bookings {getSortIcon('purchases')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('cpp')}>
-                                                <div className="flex items-center justify-center gap-1.5">CPP {getSortIcon('cpp')}</div>
-                                            </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('roas')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('roas')}>
                                                 <div className="flex items-center justify-center gap-1.5">ROAS {getSortIcon('roas')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('impressions')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('impressions')}>
                                                 <div className="flex items-center justify-center gap-1.5">Impressions {getSortIcon('impressions')}</div>
                                             </th>
-                                            <th className="px-6 py-4 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('reach')}>
+                                            <th className="px-3 py-3 text-xs font-semibold text-[--text-muted] tracking-wider uppercase text-center cursor-pointer hover:text-[--text-main] transition-colors group select-none" onClick={() => requestSort('reach')}>
                                                 <div className="flex items-center justify-center gap-1.5">Reach {getSortIcon('reach')}</div>
                                             </th>
                                         </tr>
@@ -591,7 +586,7 @@ const AdsPerformance = () => {
                                                 onClick={() => setSelectedCampaignId(cmp.id)}
                                             >
                                                 {/* Frozen campaign name cell */}
-                                                <td className={`px-6 py-4 sticky left-0 z-10 overflow-hidden shadow-[2px_0_6px_-2px_rgba(0,0,0,0.3)] ${
+                                                <td className={`px-3 py-3 sticky left-0 z-10 overflow-hidden shadow-[2px_0_6px_-2px_rgba(0,0,0,0.3)] ${
                                                     selectedCampaignId === cmp.id ? 'bg-[--primary]/10' : 'bg-[--bg-surface]'
                                                 } group-hover:bg-[--bg-card]`}>
                                                     <div className="font-bold text-[--text-main] flex items-center gap-2 max-w-[220px] whitespace-normal leading-snug">
@@ -611,7 +606,7 @@ const AdsPerformance = () => {
                                                     </div>
                                                     <div className="text-[10px] uppercase tracking-wider text-[--text-muted] mt-1">{cmp.id}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap min-w-[120px]">
+                                                <td className="px-3 py-3 whitespace-nowrap min-w-[100px]">
                                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
                                                         ${cmp.effective_status === 'ACTIVE'
                                                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
@@ -620,42 +615,36 @@ const AdsPerformance = () => {
                                                         {cmp.effective_status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.results > 0 ? (
                                                         <>{cmp.results.toLocaleString()} <span className="text-xs text-[--text-muted] font-normal">Leads</span></>
                                                     ) : '—'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.costPerResult > 0 ? (
                                                         <>{'£' + cmp.costPerResult.toFixed(2)}<span className="text-xs text-[--text-muted] font-normal"> /Lead</span></>
                                                     ) : '—'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-[--text-main] text-center">
-                                                    {cmp.budget ? '£' + cmp.budget.toFixed(2) : '—'} <span className="text-xs text-[--text-muted] font-normal">/{cmp.budgetType === 'daily' ? 'day' : 'total'}</span>
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.amountSpent > 0 ? '£' + cmp.amountSpent.toFixed(2) : '—'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.purchases > 0 ? cmp.purchases.toLocaleString() : '—'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
-                                                    {cmp.cpp > 0 ? '£' + cmp.cpp.toFixed(2) : '—'}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.roas > 0 ? cmp.roas.toFixed(2) + 'x' : '—'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.impressions > 0 ? cmp.impressions.toLocaleString() : '—'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-[--text-main] text-center">
+                                                <td className="px-3 py-3 text-sm font-bold text-[--text-main] text-center">
                                                     {cmp.reach > 0 ? cmp.reach.toLocaleString() : '—'}
                                                 </td>
                                             </tr>
                                         ))}
                                         {accountCampaigns.length === 0 && (
                                             <tr>
-                                                <td colSpan="11" className="px-6 py-8 text-center text-[--text-muted]">No campaigns found for this account.</td>
+                                                <td colSpan="9" className="px-3 py-6 text-center text-[--text-muted]">No campaigns found for this account.</td>
                                             </tr>
                                         )}
                                     </tbody>

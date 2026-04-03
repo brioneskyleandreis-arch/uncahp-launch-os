@@ -21,7 +21,8 @@ const NewLaunch = () => {
         notes: '',
         startDate: '',
         targetLaunchDate: '',
-        launchType: ''
+        launchType: '',
+        referenceNumber: ''
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -65,8 +66,9 @@ const NewLaunch = () => {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full">
-            <div className="flex justify-between items-center">
+        <div className="flex-1 overflow-y-auto custom-scrollbar w-full">
+            <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full">
+                <div className="flex justify-between items-center">
                 <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[--text-muted] hover:text-[--text-main] transition-colors w-fit">
                     <ArrowLeft size={16} /> Back to Dashboard
                 </button>
@@ -180,6 +182,19 @@ const NewLaunch = () => {
                             disabled={isSubmitting}
                         />
                     </div>
+                    
+                    {/* Reference Number */}
+                    <div className="md:col-span-2">
+                        <label className="label">Reference Number (Manual)</label>
+                        <input
+                            type="text"
+                            name="referenceNumber"
+                            placeholder="e.g. REF-12345"
+                            value={formData.referenceNumber}
+                            onChange={handleChange}
+                            disabled={isSubmitting}
+                        />
+                    </div>
                 </div>
 
                 {/* Notes (Full Width) */}
@@ -210,6 +225,7 @@ const NewLaunch = () => {
                     </button>
                 </div>
             </form>
+            </div>
         </div>
     );
 };

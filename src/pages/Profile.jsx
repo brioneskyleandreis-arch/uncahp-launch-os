@@ -96,7 +96,7 @@ const Profile = () => {
                     {/* Check for existing avatar or use initials */}
                     <div className="flex items-center gap-6 mb-8">
                         <div className="relative group">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#f48ccf] to-[#c084fc] flex items-center justify-center text-white font-bold text-3xl ring-4 ring-[--bg-app] shadow-xl overflow-hidden">
+                            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#f472d0] to-[#c084fc] flex items-center justify-center text-white font-bold text-3xl ring-4 ring-[--bg-app] shadow-xl overflow-hidden">
                                 {formData.avatarUrl ? (
                                     <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (

@@ -71,8 +71,8 @@ const Settings = () => {
             <div className="max-w-4xl mx-auto p-4 lg:p-8">
                 {/* Header */}
                 <div className="mb-8 flex items-center gap-3">
-                    <div className="p-2.5 bg-[#f48ccf]/10 rounded-xl">
-                        <SettingsIcon size={24} className="text-[#f48ccf]" />
+                    <div className="p-2.5 bg-[#f472d0]/10 rounded-xl">
+                        <SettingsIcon size={24} className="text-[#f472d0]" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-[--text-muted] bg-clip-text text-transparent">
@@ -150,7 +150,7 @@ const Settings = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="bg-gradient-to-r from-[#f48ccf] to-[#c084fc] hover:opacity-90 text-white font-bold py-3 px-8 rounded-xl transition-all transform active:scale-[0.98] flex items-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-gradient-to-r from-[#f472d0] to-[#c084fc] hover:opacity-90 text-white font-bold py-3 px-8 rounded-xl transition-all transform active:scale-[0.98] flex items-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
                                 {loading ? 'Saving preferences...' : 'Save Settings'}

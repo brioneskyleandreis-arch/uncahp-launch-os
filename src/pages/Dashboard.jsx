@@ -173,8 +173,14 @@ const Dashboard = () => {
                                 const uniqueAssignees = [...new Set(activeAssignees)];
 
                                 return uniqueAssignees.slice(0, 5).map((name, i) => (
-                                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[--bg-card] flex items-center justify-center text-xs font-bold shadow-sm" style={{ background: getAssignedAvatar(name), color: 'rgba(0,0,0,0.6)' }} title={name}>
-                                        {name.charAt(0)}
+                                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[--bg-card] flex items-center justify-center text-xs font-bold shadow-sm overflow-hidden" title={name}>
+                                        {name === 'Franz' ? (
+                                            <img src="https://ui-avatars.com/api/?name=Franz&background=cbd5e1&color=fff&size=64" alt="Franz" className="w-full h-full object-cover"/>
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center" style={{ background: getAssignedAvatar(name), color: 'rgba(0,0,0,0.6)' }}>
+                                                {name.charAt(0)}
+                                            </div>
+                                        )}
                                     </div>
                                 ));
                             })()}
@@ -255,8 +261,9 @@ const Dashboard = () => {
                         <div className="grid grid-cols-12 gap-4 px-6 py-2 text-xs font-bold text-[--text-muted] uppercase tracking-wider select-none">
                             <div className="col-span-2"><SortHeader label="Client / Treatment" sortKey="client" align="left" /></div>
                             <div className="col-span-2"><SortHeader label="Offer" sortKey="offer" /></div>
+                            <div className="col-span-1"><SortHeader label="Ref #" sortKey="referenceNumber" /></div>
                             <div className="col-span-2"><SortHeader label="Stage" sortKey="stage" /></div>
-                            <div className="col-span-2"><SortHeader label="Assigned" sortKey="assigned" /></div>
+                            <div className="col-span-1"><SortHeader label="Assigned" sortKey="assigned" /></div>
                             <div className="col-span-1"><SortHeader label="Target" sortKey="target" /></div>
                             <div className="col-span-2"><SortHeader label="Delivery" sortKey="delivery" /></div>
                             <div className="col-span-1 text-right items-center flex justify-end">Actions</div>
@@ -310,6 +317,11 @@ const Dashboard = () => {
                                         {launch.offer}
                                     </div>
 
+                                    {/* Reference Number */}
+                                    <div className="col-span-1 text-xs text-[--text-muted] font-medium text-center truncate px-1" title={launch.referenceNumber}>
+                                        {launch.referenceNumber ? `#${launch.referenceNumber}` : '--'}
+                                    </div>
+
                                     {/* Stage (Earliest Pending) */}
                                     <div className="col-span-2 flex justify-center">
                                         <span className={`text-xs font-bold px-2.5 py-1 rounded-full border truncate transition-colors ${isComplete
@@ -321,9 +333,15 @@ const Dashboard = () => {
                                     </div>
 
                                     {/* Assigned */}
-                                    <div className="col-span-2 flex items-center justify-center gap-2">
-                                        <div className="w-6 h-6 rounded-full border border-[--bg-app]" style={{ background: getAssignedAvatar(assignee) }} title={assignee}></div>
-                                        <span className="text-xs text-[--text-muted] truncate">{assignee}</span>
+                                    <div className="col-span-1 flex items-center justify-center gap-2">
+                                        <div className="w-6 h-6 rounded-full border border-[--bg-app] overflow-hidden" title={assignee}>
+                                            {assignee === 'Franz' ? (
+                                                <img src="https://ui-avatars.com/api/?name=Franz&background=cbd5e1&color=fff&size=64" alt="Franz" className="w-full h-full object-cover"/>
+                                            ) : (
+                                                <div className="w-full h-full" style={{ background: getAssignedAvatar(assignee) }}></div>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-[--text-muted] truncate hidden xl:inline-block">{assignee}</span>
                                     </div>
 
                                     {/* Date */}

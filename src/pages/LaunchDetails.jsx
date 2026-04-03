@@ -286,6 +286,11 @@ const LaunchDetails = () => {
                             <div className="flex items-center gap-2 text-sm font-normal text-[--text-muted]">
                                 <Rocket size={14} /> Treatment: <span className="text-[--text-main] font-medium">{launch.treatment}</span>
                             </div>
+                            {launch.referenceNumber && (
+                                <span className="text-xs font-bold text-[--text-main] bg-[--bg-surface] border border-[--border] px-2 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                                    Ref: <span className="text-[--primary]">#{launch.referenceNumber}</span>
+                                </span>
+                            )}
                             {launch.launch_type && (
                                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[--bg-surface] border border-[--border] text-[--text-muted] tracking-wide">
                                     {launch.launch_type}
